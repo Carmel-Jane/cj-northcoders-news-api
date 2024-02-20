@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express();
 const { getTopics } = require("./controllers/topics.controller");
+const getAllEndpoints = require("./controllers/api.controller");
 
 app.use(express.json());
 
 app.get(`/api/topics`, getTopics);
+
+app.get(`/api`, getAllEndpoints)
 
 app.use((err, req, res, next) => {
   console.error(err);
@@ -16,12 +19,6 @@ app.use((err, req, res, next) => {
   }
   res.status(500).json({ error: "Internal Server Error" });
 });
-app.listen(9090, (error) => {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log("server is listening on port 9090");
-  }
-});
+
 
 module.exports = app;
