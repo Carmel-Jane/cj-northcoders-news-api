@@ -39,3 +39,24 @@ describe("GET /api", () => {
       });
   });
 });
+describe("GET /api/articles/:article_id", () =>{
+    test("should respond with an object with the correct properties", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then((res) => {
+            console.log(res.body)
+            const body = res.body;
+            expect(typeof body).toBe("object");
+            expect(body.article).toHaveProperty("author");
+            expect(body.article).toHaveProperty("title");
+            expect(body.article).toHaveProperty("article_id");
+            expect(body.article).toHaveProperty("body");
+            expect(body.article).toHaveProperty("topic");
+            expect(body.article).toHaveProperty("created_at");
+            expect(body.article).toHaveProperty("votes");
+            expect(body.article).toHaveProperty("article_img_url");
+          });
+      });
+    });
+
