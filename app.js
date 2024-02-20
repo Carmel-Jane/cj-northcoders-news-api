@@ -2,12 +2,16 @@ const express = require("express");
 const app = express();
 const { getTopics } = require("./controllers/topics.controller");
 const getAllEndpoints = require("./controllers/api.controller");
+const getArticleById = require("./controllers/article.controller");
 
 app.use(express.json());
 
 app.get(`/api/topics`, getTopics);
 
 app.get(`/api`, getAllEndpoints)
+
+
+app.get('/api/articles/:article_id', getArticleById)
 
 app.use((err, req, res, next) => {
   console.error(err);
