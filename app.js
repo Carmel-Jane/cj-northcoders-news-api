@@ -2,7 +2,8 @@ const express = require("express");
 const app = express();
 const { getTopics } = require("./controllers/topics.controller");
 const getAllEndpoints = require("./controllers/api.controller");
-const getArticleById = require("./controllers/article.controller");
+const {getArticles, getArticleById} = require("./controllers/article.controller");
+const {handleCustomErrors, handleServerErrors, handlePsqlErrors} = require('./errors')
 
 app.use(express.json());
 
@@ -10,19 +11,16 @@ app.get(`/api/topics`, getTopics);
 
 app.get(`/api`, getAllEndpoints)
 
-
 app.get('/api/articles/:article_id', getArticleById)
 
-app.use((err, req, res, next) => {
-  console.error(err);
+app.get('/api/articles', getArticles);
 
-  if (err.name === "SyntaxError") {
-    return res.status(400).json({ error: "Invalid JSON" });
-  } else if (err.name === "UnauthorizedError") {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  res.status(500).json({ error: "Internal Server Error" });
-});
+app.use((request, response)=> {
+    response.status(404).send({msg: "Not found"})
+})  
+app.use(handlePsqlErrors);
+app.use(handleCustomErrors);
 
+app.use(handleServerErrors);
 
 module.exports = app;
