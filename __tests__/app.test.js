@@ -4,7 +4,7 @@ const app = require("../app");
 const db = require("../db/connection");
 const request = require("supertest");
 const endpoints = require("../endpoints.json");
-const { toBeSorted, toBeSortedBy } = require('jest-sorted');
+const { toBeSorted, toBeSortedBy } = require("jest-sorted");
 
 beforeEach(() => seed(testData));
 
@@ -24,10 +24,10 @@ describe("GET /api/topics", () => {
         });
       });
   });
-});
-describe("error handling get requests", () => {
-  test("should respond with status code 404 if the endpoint is not found", () => {
-    return request(app).get("/api/invalid-endpoint").expect(404);
+  describe("error handling get requests", () => {
+    test("should respond with status code 404 if the endpoint is not found", () => {
+      return request(app).get("/api/invalid-endpoint").expect(404);
+    });
   });
 });
 describe("GET /api", () => {
@@ -60,26 +60,25 @@ describe("GET /api/articles/:article_id", () => {
         });
       });
   });
-});
-describe("error handling get article id", () => {
-  test("status:400, responds with an error message when passed a bad article ID", () => {
-    return request(app)
-      .get("/api/articles/notAnID")
-      .expect(400)
-      .then((response) => {
-        expect(response.body.msg).toBe("Bad request");
-      });
-  });
+  describe("error handling for GET article id", () => {
+    test("status:400, responds with an error message when passed a bad article ID", () => {
+      return request(app)
+        .get("/api/articles/notAnID")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
 
-  test("should respond with 404 if article_id does not exist", () => {
-    return request(app)
-      .get("/api/articles/9999")
-      .expect(404)
-      .then((res) => {
-        console.log(res.body);
-        const msg = res.body.msg;
-        expect(msg).toBe("No article found for article_id: 9999");
-      });
+    test("should respond with 404 if article_id does not exist", () => {
+      return request(app)
+        .get("/api/articles/9999")
+        .expect(404)
+        .then((res) => {
+          const msg = res.body.msg;
+          expect(msg).toBe("No article found for article_id: 9999");
+        });
+    });
   });
 });
 describe("GET/api/articles", () => {
@@ -102,13 +101,59 @@ describe("GET/api/articles", () => {
         });
       });
   });
-  test("articles in the array should be sorted by date in descending order", () =>{
+  test("articles in the array should be sorted by date in descending order", () => {
     return request(app)
-    .get("/api/articles")
-    .expect(200)
-    .then((res) => {
-      const articles = res.body;
-      expect(articles).toBeSortedBy('created_at', {descending: true})
-    })
-  })
+      .get("/api/articles")
+      .expect(200)
+      .then((res) => {
+        const articles = res.body;
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+});
+describe("GET/api/articles/:article_id/comments", () => {
+  test("should respond with an array of comments for given article_id, each with the correct properties", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toHaveLength(11);
+        res.body.forEach((comment) => {
+          expect(comment).toMatchObject({
+            body: expect.any(String),
+            votes: expect.any(Number),
+            author: expect.any(String),
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+          });
+        });
+      });
+  });
+  test("comments in the array should be sorted by date in descending order, the most recent comment first", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((res) => {
+        const comments = res.body;
+        expect(comments).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  describe("error handling for GET comments", () => {
+    test("status:400, responds with an error message when passed a bad article ID", () => {
+      return request(app)
+        .get("/api/articles/notAnID/comments")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+    test("responds with status 200 and returns an empty array when given a valid article ID when article does not have comments", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then((response) => {
+          expect(response.body).toEqual([]);
+        });
+    });
+  });
 });
