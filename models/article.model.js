@@ -28,4 +28,5 @@ function readArticleById(articleId) {
       return articleById.rows[0];
     });
 }
-module.exports = { readArticlesSortByDate, readArticleById };
+
+module.exports = { readArticlesSortByDate, readArticleById }

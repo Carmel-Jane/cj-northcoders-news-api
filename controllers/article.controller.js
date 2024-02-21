@@ -1,4 +1,4 @@
-const { readArticlesSortByDate, readArticleById } = require("../models/article.model");
+const { readArticlesSortByDate, readArticleById} = require("../models/article.model");
 
 function getArticles(req, res, next) {
   readArticlesSortByDate()
