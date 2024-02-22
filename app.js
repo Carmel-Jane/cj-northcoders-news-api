@@ -7,6 +7,7 @@ const {
   getArticleById, patchArticle
 } = require("./controllers/article.controller");
 const {getCommentsByArticleId, postComment, deleteComment} = require('./controllers/comment.controller')
+const {getAllUsers} = require('./controllers/users.controller')
 const {
   handleCustomErrors,
   handleServerErrors,
@@ -16,6 +17,8 @@ const {
 app.use(express.json());
 
 app.get(`/api`, getAllEndpoints);
+
+app.get('/api/users', getAllUsers);
 
 app.get(`/api/topics`, getTopics);
 
@@ -30,6 +33,7 @@ app.post("/api/articles/:article_id/comments", postComment)
 app.patch("/api/articles/:article_id", patchArticle)
 
 app.delete("/api/comments/:comment_id", deleteComment)
+
 
 app.use((request, response) => {
   response.status(404).send({ msg: "404 Error. This page doesn't exist" });
