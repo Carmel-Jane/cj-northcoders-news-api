@@ -25,8 +25,13 @@ describe("GET /api/topics", () => {
       });
   });
   describe("error handling get requests", () => {
-    test("should respond with status code 404 if the endpoint is not found", () => {
-      return request(app).get("/api/invalid-endpoint").expect(404);
+    test("404: should respond with status code 404 if the endpoint is not found", () => {
+      return request(app)
+        .get("/api/invaid-endpoint")
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("404 Error. This page doesn't exist");
+        });
     });
   });
 });
@@ -61,7 +66,7 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
   describe("error handling for GET article id", () => {
-    test("status:400, responds with an error message when passed a bad article ID", () => {
+    test("400. Should respond with 400 and an error message when passed a bad article ID", () => {
       return request(app)
         .get("/api/articles/notAnID")
         .expect(400)
@@ -70,7 +75,7 @@ describe("GET /api/articles/:article_id", () => {
         });
     });
 
-    test("should respond with 404 if article_id does not exist", () => {
+    test("404. Should respond with 404 if article_id does not exist", () => {
       return request(app)
         .get("/api/articles/9999")
         .expect(404)
@@ -123,7 +128,7 @@ describe("GET/api/articles/:article_id/comments", () => {
             body: expect.any(String),
             votes: expect.any(Number),
             author: expect.any(String),
-            article_id: expect.any(Number),
+            article_id: 1,
             created_at: expect.any(String),
           });
         });
@@ -139,7 +144,7 @@ describe("GET/api/articles/:article_id/comments", () => {
       });
   });
   describe("error handling for GET comments", () => {
-    test("status:400, responds with an error message when passed a bad article ID", () => {
+    test("400. Should respond with 400 and an error message when passed a bad article ID", () => {
       return request(app)
         .get("/api/articles/notAnID/comments")
         .expect(400)
@@ -157,3 +162,177 @@ describe("GET/api/articles/:article_id/comments", () => {
     });
   });
 });
+describe("POST/api/articles/:article_id/comments", () => {
+  test("should return the comment from the user with the correct properties and a status 201", () => {
+    const inputComment = {
+      username: "lurker",
+      body: "this is a new comment",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(inputComment)
+      .expect(201)
+      .then((response) => {
+        const newComment = response.body.comment;
+        expect(newComment).toMatchObject({
+          body: "this is a new comment",
+          votes: expect.any(Number),
+          author: "lurker",
+          article_id: 1,
+          created_at: expect.any(String),
+        });
+    })})
+    test("should return the comment from the user and status 201, even if there are extra properties added to the inputted comment", () => {
+        const inputComment = {
+          username: "lurker",
+          body: "this is a new comment",
+          extraProperty: "extra property"
+        };
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send(inputComment)
+          .expect(201)
+          .then((response) => {
+            const newComment = response.body.comment;
+            expect(newComment).toMatchObject({
+              body: expect.any(String),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              article_id: expect.any(Number),
+              created_at: expect.any(String),
+            });
+          });
+        })
+  describe("error handling for post comment", () => {
+      test("404. Should respond with 404 and error message if the article Id doesn't exist", () => {
+        return request(app)
+          .post("/api/articles/12345")
+          .send({
+            username: "lurker",
+            body: "New comment",
+          })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("404 Error. This page doesn't exist");
+          });
+      });
+      test("404. Should respond with 404 and error message if the username doesn't exist", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({
+            username: "cj",
+            body: "New comment",
+          })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("404 Error. This username doesn't exist");
+          });
+      });
+      test("400. Should respond with 400 and error message if there is an invalid article ID", () => {
+        return request(app)
+          .get("/api/articles/carmel/comments")
+          .send({
+            username: "lurker",
+            body: "New comment",
+          })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request");
+          });
+      });
+    });
+    test("400. Should responsd with 400 and error message if the body is missing", () => {
+      const inputComment = {
+        username: "lurker",
+      };
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send(inputComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    
+  });
+
+describe("PATCH/api/articles/:article_id", () => {
+  test("should respond with updated article with new number of votes", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: 23 })
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article).toMatchObject({
+          author: "butter_bridge",
+          title: "Living in the shadow of a great man",
+          article_id: 1,
+          body: "I find this existence challenging",
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: 123,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  describe("error handling for patch articles", () => {
+    test("404. Should respond with 404 error and message when requesting an article that does not exist", () => {
+      return request(app)
+        .patch("/api/articles/12345")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("404 Error. This article doesn't exist");
+        });
+    });
+    test("400.Should respond with 400 error and message when requesting an invalid ID", () => {
+      return request(app)
+        .patch("/api/articles/carmel")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("400.Should respond with 400 error and message when request has missing fields, not sending a number", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("400. Should respond with 400 error and message when request has the wrong content, sending a word instead of number", () => {
+      return request(app)
+        .patch("/api/articles/5")
+        .send({ inc_votes: "one" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
+});
+describe("DELETE/api/comments/:comment_id", () => {
+  test("204. Should respond with 204 and no content", () => {
+    return request(app).delete("/api/comments/2").expect(204);
+  });
+  test("404. Should respond with 404 and error message when the comment id doesn't exist", () => {
+    return request(app)
+      .delete("/api/comments/12345")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("404 Error. Comment doesn't exist");
+      });
+  });
+  test("400. Should respond with 400 and error message when comment id is invalid", () => {
+    return request(app)
+      .delete("/api/comments/carmel")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+})

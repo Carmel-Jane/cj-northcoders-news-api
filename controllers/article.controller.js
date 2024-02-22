@@ -1,4 +1,4 @@
-const { readArticlesSortByDate, readArticleById} = require("../models/article.model");
+const { readArticlesSortByDate, readArticleById, updateArticle} = require("../models/article.model");
 
 function getArticles(req, res, next) {
   readArticlesSortByDate()
@@ -21,5 +21,13 @@ function getArticleById(req, res, next) {
       next(err);
     });
 }
-
-module.exports = { getArticles, getArticleById };
+function patchArticle(req, res, next){
+  const { article_id } = req.params;
+  const { body } = req;
+  updateArticle(article_id, body)
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch(next);
+}
+module.exports = { getArticles, getArticleById, patchArticle };

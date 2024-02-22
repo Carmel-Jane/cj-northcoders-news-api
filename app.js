@@ -4,9 +4,9 @@ const { getTopics } = require("./controllers/topics.controller");
 const getAllEndpoints = require("./controllers/api.controller");
 const {
   getArticles,
-  getArticleById,
+  getArticleById, patchArticle
 } = require("./controllers/article.controller");
-const getCommentsByArticleId = require('./controllers/comment.controller')
+const {getCommentsByArticleId, postComment, deleteComment} = require('./controllers/comment.controller')
 const {
   handleCustomErrors,
   handleServerErrors,
@@ -25,8 +25,14 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 
+app.post("/api/articles/:article_id/comments", postComment)
+
+app.patch("/api/articles/:article_id", patchArticle)
+
+app.delete("/api/comments/:comment_id", deleteComment)
+
 app.use((request, response) => {
-  response.status(404).send({ msg: "Not found" });
+  response.status(404).send({ msg: "404 Error. This page doesn't exist" });
 });
 app.use(handlePsqlErrors);
 app.use(handleCustomErrors);
