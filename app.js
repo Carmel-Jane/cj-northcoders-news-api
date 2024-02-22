@@ -4,7 +4,7 @@ const { getTopics } = require("./controllers/topics.controller");
 const getAllEndpoints = require("./controllers/api.controller");
 const {
   getArticles,
-  getArticleById,
+  getArticleById, patchArticle
 } = require("./controllers/article.controller");
 const {getCommentsByArticleId, postComment} = require('./controllers/comment.controller')
 const {
@@ -26,6 +26,8 @@ app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 
 app.post("/api/articles/:article_id/comments", postComment)
+
+app.patch("/api/articles/:article_id", patchArticle)
 
 app.use((request, response) => {
   response.status(404).send({ msg: "404 Error. This page doesn't exist" });

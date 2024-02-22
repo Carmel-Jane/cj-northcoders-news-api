@@ -25,7 +25,7 @@ describe("GET /api/topics", () => {
       });
   });
   describe("error handling get requests", () => {
-    test("should respond with status code 404 if the endpoint is not found", () => {
+    test("404: should respond with status code 404 if the endpoint is not found", () => {
         return request(app)
         .get("/api/invaid-endpoint")
         .expect(404)
@@ -66,7 +66,7 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
   describe("error handling for GET article id", () => {
-    test("status:400, responds with an error message when passed a bad article ID", () => {
+    test("400. Should respond with 400 and an error message when passed a bad article ID", () => {
       return request(app)
         .get("/api/articles/notAnID")
         .expect(400)
@@ -75,7 +75,7 @@ describe("GET /api/articles/:article_id", () => {
         });
     });
 
-    test("should respond with 404 if article_id does not exist", () => {
+    test("404. Should respond with 404 if article_id does not exist", () => {
       return request(app)
         .get("/api/articles/9999")
         .expect(404)
@@ -145,7 +145,7 @@ describe("GET/api/articles/:article_id/comments", () => {
       });
   });
   describe("error handling for GET comments", () => {
-    test("status:400, responds with an error message when passed a bad article ID", () => {
+    test("400. Should respond with 400 and an error message when passed a bad article ID", () => {
       return request(app)
         .get("/api/articles/notAnID/comments")
         .expect(400)
@@ -186,7 +186,7 @@ describe("POST/api/articles/:article_id/comments", () => {
       });
   });
   describe("error handling for post comment", () => {
-    test("should response with Status 400 if the body is missing", () => {
+    test("400. Should responsd with 400 and error message if the body is missing", () => {
       const inputComment = {
         username: "lurker",
       };
@@ -198,7 +198,7 @@ describe("POST/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Bad request");
         });
     });
-    test("should response with Status 400 if the username is missing", () => {
+    test("400. Should respond with 400 and error message if the username is missing", () => {
       const inputComment = {
         body: "body without username",
       };
@@ -212,3 +212,62 @@ describe("POST/api/articles/:article_id/comments", () => {
     });
   });
 });
+describe("PATCH/api/articles/:article_id", () => {
+    test("should respond with updated article with new number of votes", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 23 })
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article).toMatchObject({
+            author: "butter_bridge",
+            title: "Living in the shadow of a great man",
+            article_id: 1,
+            body: "I find this existence challenging",
+            topic: "mitch",
+            created_at: expect.any(String),
+            votes: 123,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    describe("error handling for patch articles", () =>{
+    test("404. Should respond with 404 error and message when requesting an article that does not exist", () => {
+      return request(app)
+        .patch("/api/articles/12345")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("404 Error. This article doesn't exist");
+        });
+    });
+    test("400.Should respond with 400 error and message when requesting an invalid ID", () => {
+      return request(app)
+        .patch("/api/articles/carmel")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("400.Should respond with 400 error and message when request has missing fields, not sending a number", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("400. Should respond with 400 error and message when request has the wrong content, sending a word instead of number", () => {
+      return request(app)
+        .patch("/api/articles/5")
+        .send({ inc_votes: "one" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+})
+  });
