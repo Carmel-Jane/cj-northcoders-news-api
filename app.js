@@ -6,7 +6,7 @@ const {
   getArticles,
   getArticleById,
 } = require("./controllers/article.controller");
-const getCommentsByArticleId = require('./controllers/comment.controller')
+const {getCommentsByArticleId, postComment} = require('./controllers/comment.controller')
 const {
   handleCustomErrors,
   handleServerErrors,
@@ -25,8 +25,10 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 
+app.post("/api/articles/:article_id/comments", postComment)
+
 app.use((request, response) => {
-  response.status(404).send({ msg: "Not found" });
+  response.status(404).send({ msg: "404 Error. This page doesn't exist" });
 });
 app.use(handlePsqlErrors);
 app.use(handleCustomErrors);

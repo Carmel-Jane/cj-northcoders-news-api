@@ -48,6 +48,11 @@
       "article_id": 9,
      " created_at": 1586179020000
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "Accepts an object with username and body properties, and returns with the posted comment",
+    "exampleInput": {
+      "username": "example username",
+      "body": "example comment body"}
+    }
   }
-}
-

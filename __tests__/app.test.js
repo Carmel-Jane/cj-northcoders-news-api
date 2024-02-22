@@ -26,7 +26,12 @@ describe("GET /api/topics", () => {
   });
   describe("error handling get requests", () => {
     test("should respond with status code 404 if the endpoint is not found", () => {
-      return request(app).get("/api/invalid-endpoint").expect(404);
+        return request(app)
+        .get("/api/invaid-endpoint")
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("404 Error. This page doesn't exist");
+        });
     });
   });
 });
@@ -117,6 +122,7 @@ describe("GET/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then((res) => {
+        
         expect(res.body).toHaveLength(11);
         res.body.forEach((comment) => {
           expect(comment).toMatchObject({
@@ -153,6 +159,55 @@ describe("GET/api/articles/:article_id/comments", () => {
         .expect(200)
         .then((response) => {
           expect(response.body).toEqual([]);
+        });
+    });
+  });
+});
+describe("POST/api/articles/:article_id/comments", () => {
+  test("should return the comment from the user with the correct properties and a status 201", () => {
+    const inputComment = {
+      username: "lurker",
+      body: "this is a new comment",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(inputComment)
+      .expect(201)
+      .then((response) => {
+       
+        const newComment = response.body.comment;
+        expect(newComment).toMatchObject({
+          body: expect.any(String),
+          votes: expect.any(Number),
+          author: expect.any(String),
+          article_id: expect.any(Number),
+          created_at: expect.any(String),
+        });
+      });
+  });
+  describe("error handling for post comment", () => {
+    test("should response with Status 400 if the body is missing", () => {
+      const inputComment = {
+        username: "lurker",
+      };
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send(inputComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("should response with Status 400 if the username is missing", () => {
+      const inputComment = {
+        body: "body without username",
+      };
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send(inputComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
         });
     });
   });
