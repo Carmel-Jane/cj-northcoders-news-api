@@ -87,7 +87,7 @@ describe("GET /api/articles/:article_id", () => {
   });
 });
 describe("GET/api/articles", () => {
-  test("should respond with an array of article objects with correct properties", () => {
+  test("should respond with an array of article objects with correct properties, if no query is provided", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -115,7 +115,30 @@ describe("GET/api/articles", () => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
+  describe("GET/api/articles topic query", ()=>{
+    test("responds with an array of articles according to the topic query", () => {
+        return request(app)
+          .get("/api/articles?topic=cats")
+          .expect(200)
+          .then(({body}) => {
+            console.log(body)
+            console.log(body.articles)
+            expect(body.articles.length).toBe(1);
+          });
+      });
+      describe("error handling for get article topic query", ()=>{
+        test("404. Should respond with 404 and error message if the topic doesn't exist", () => {
+          return request(app)
+            .get("/api/articles?topic=carmel")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+             
+              expect(msg).toBe("404 Error. This topic doesn't exist");
+            });
+        });
+  })
 });
+})
 describe("GET/api/articles/:article_id/comments", () => {
   test("should respond with an array of comments for given article_id, each with the correct properties", () => {
     return request(app)

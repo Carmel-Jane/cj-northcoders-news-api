@@ -17,7 +17,7 @@ const checkIfUsernameExists = async (username) => {
   );
 
   if (dbOutput.rows.length === 0) {
-    // resource does NOT exist
+    
     return Promise.reject({ status: 404, msg: "404 Error. This username doesn't exist" });
   }
 };
@@ -39,7 +39,7 @@ function insertComment(articleId, newComment) {
         });
     })
     .catch((error) => {
-      // Handle the error from checkIfUsernameExists
+      
       return Promise.reject(error);
     });
 }
