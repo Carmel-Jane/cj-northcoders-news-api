@@ -404,3 +404,26 @@ describe("GET/api/users", () =>{
           });
       });
 })
+describe("GET/api/users:username", () =>{
+  test("should respond with user object belonging to username", () => {
+    return request(app)
+      .get("/api/users/lurker")
+      .expect(200)
+      .then(({ body: { user } }) => {
+        expect(user).toMatchObject({
+          username: expect.any(String),
+          avatar_url: expect.any(String),
+          name: expect.any(String),
+        });
+      });
+  });
+  test("404. Should responds with 404  error message when username does not exist", () => {
+    return request(app)
+      .get("/api/users/carmel")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("404 Error. This username doesn't exist");
+      });
+  });
+});
+
