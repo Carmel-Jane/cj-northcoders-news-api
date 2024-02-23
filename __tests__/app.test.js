@@ -64,7 +64,16 @@ describe("GET /api/articles/:article_id", () => {
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
         });
       });
-  });
+    })
+      test("should respond with an article with a comment count property", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).toHaveProperty("comment_count", 11);
+          });
+      });
+  
   describe("error handling for GET article id", () => {
     test("400. Should respond with 400 and an error message when passed a bad article ID", () => {
       return request(app)
@@ -121,8 +130,6 @@ describe("GET/api/articles", () => {
           .get("/api/articles?topic=cats")
           .expect(200)
           .then(({body}) => {
-            console.log(body)
-            console.log(body.articles)
             expect(body.articles.length).toBe(1);
           });
       });
