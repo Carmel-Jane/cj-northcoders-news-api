@@ -1,20 +1,14 @@
-const { readArticlesSortByDate, readArticleById, updateArticle, readArticleByTopic} = require("../models/article.model");
+const {  readArticleById, updateArticle, readArticlesByQuery} = require("../models/article.model");
 
-function getArticles(req, res, next) {
-  const { topic } = req.query;
-
-  if (topic) {
-    
-    getArticlesByTopic(req, res, next);
-  } else {
-  readArticlesSortByDate()
+function getArticles(req, res, next){
+  const {topic, sort_by, order} = req.query
+  readArticlesByQuery(topic, sort_by, order)
     .then((articles) => {
-      res.status(200).send(articles);
+      res.status(200).send({ articles });
     })
-    .catch((err) => {
-      next(err);
-    });
-}}
+    .catch(next);
+};
+
 
 function getArticleById(req, res, next) {
   const articleId = req.params.article_id;
@@ -37,14 +31,4 @@ function patchArticle(req, res, next){
     .catch(next);
 }
 
-function getArticlesByTopic(req, res, next){
-  const { topic } = req.query;
-  readArticleByTopic(topic)
- 
-    .then((articles) => {
-    
-      res.status(200).send({ articles });
-    })
-    .catch(next);
-};
-module.exports = { getArticles, getArticleById, patchArticle, getArticlesByTopic };
+module.exports = { getArticles, getArticleById, patchArticle };

@@ -3,17 +3,14 @@ const articlesRouter = express.Router();
 const {
   getArticles,
   getArticleById,
-  patchArticle,
-  getArticlesByTopic,
+  patchArticle
 } = require("../controllers/article.controller");
 const {
   getCommentsByArticleId,
   postComment,
 } = require("../controllers/comment.controller");
 
-articlesRouter.route("/").get(getArticles, getArticlesByTopic);
-
-// articlesRouter.route('/:topic').get(getArticlesByTopic)
+articlesRouter.route("/").get(getArticles);
 
 articlesRouter.route("/:article_id").get(getArticleById).patch(patchArticle);
 

@@ -96,12 +96,13 @@ describe("GET /api/articles/:article_id", () => {
   });
 });
 describe("GET/api/articles", () => {
-  test("should respond with an array of article objects with correct properties, if no query is provided", () => {
+  test("should respond by with an array of article objects with correct properties, if no query is provided", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
       .then((res) => {
-        const articles = res.body;
+        const articles = res.body.articles
+  
         expect(articles.length).toBe(13);
         articles.forEach((article) => {
           expect(article).toMatchObject({
@@ -115,16 +116,16 @@ describe("GET/api/articles", () => {
         });
       });
   });
-  test("articles in the array should be sorted by date in descending order", () => {
+  test("articles in the array should be sorted by date in descending order by default, if no query is provided", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
       .then((res) => {
-        const articles = res.body;
+        const articles = res.body.articles
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
-  describe("GET/api/articles topic query", ()=>{
+  describe("GET/api/articles topic query", () =>{
     test("responds with an array of articles according to the topic query", () => {
         return request(app)
           .get("/api/articles?topic=cats")
@@ -145,6 +146,26 @@ describe("GET/api/articles", () => {
         });
   })
 });
+describe("GET/api/articles sort_by query",() => {
+  test("should return articles sorted by the requested column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("author", { descending: true });
+      });
+  });
+})
+describe("GET/api/articles order query",() => {
+  test("should return articles ordered ascending if asc is requested", () => {
+    return request(app)
+      .get("/api/articles?order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at", { ascending: true });
+      });
+  });
+})
 })
 describe("GET/api/articles/:article_id/comments", () => {
   test("should respond with an array of comments for given article_id, each with the correct properties", () => {
