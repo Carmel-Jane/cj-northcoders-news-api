@@ -52,5 +52,21 @@ function deleteCommentModel(commentId) {
       }
     });
 }
-
-module.exports = { readCommentsByArticleId, insertComment, deleteCommentModel };
+function updateCommentVotes(commentId, update){
+  return db
+    .query(
+      `UPDATE comments
+  SET
+    votes = votes + $1
+  WHERE comment_id = $2
+  RETURNING *;`,
+      [update.inc_votes, commentId]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "404 Error. This comment doesn't exist" });
+      }
+      return rows[0];
+    });
+};
+module.exports = { readCommentsByArticleId, insertComment, deleteCommentModel, updateCommentVotes };

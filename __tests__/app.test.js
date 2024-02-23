@@ -387,6 +387,61 @@ describe("DELETE/api/comments/:comment_id", () => {
       });
   });
 })
+describe("PATCH/api/comments/:comment_id", () => {
+  test("should update the votes on comment", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ inc_votes: 10})
+      .expect(200)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+          votes: 24,
+          author: "butter_bridge",
+          article_id: 1,
+          created_at: expect.any(String),
+        });
+      });
+  });
+  describe("error handling for patch comments", () =>{
+  test("404: responds with 404 and message if comment doesn't exist", () => {
+    return request(app)
+      .patch("/api/comments/12345")
+      .send({ inc_votes: -5 })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("404 Error. This comment doesn't exist");
+      });
+  });
+  test("400. Returns 400 and error message if comment ID is invalid", () => {
+    return request(app)
+      .patch("/api/comments/carmel")
+      .send({ inc_votes: 96 })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("400. Returns 400 and error message if request is missing a field", () => {
+    return request(app)
+      .patch("/api/comments/4")
+      .send({})
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("400. Returns 400 and error message if request has invalid content", () => {
+    return request(app)
+      .patch("/api/comments/4")
+      .send({ inc_votes: "carmel" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+});
+})
 describe("GET/api/users", () =>{
     test("should respond with an array of all users", () => {
         return request(app)
