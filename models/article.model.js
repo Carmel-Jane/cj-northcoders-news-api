@@ -45,4 +45,33 @@ function updateArticle(articleId, update){
       return rows[0];
     });
 };
-module.exports = { readArticlesSortByDate, readArticleById, updateArticle }
+const checkTopicExists = async (topic) => {
+  const dbOutput = await db.query(
+    'SELECT * FROM topics WHERE slug = $1;',
+    [topic]
+  );
+
+  if (dbOutput.rows.length === 0) {
+    
+    return Promise.reject({ status: 404, msg: "404 Error. This topic doesn't exist" })}
+    else {
+   
+      return dbOutput.rows[0]; 
+    }
+  ;
+  }
+
+function readArticleByTopic(topic){
+  console.log(topic)
+  return checkTopicExists(topic).then(()=>{
+      return db.query(`SELECT * FROM articles WHERE topic = $1`, [topic])
+    .then(({ rows }) => {
+      return rows;
+    })
+  })
+  .catch((error) => {
+      
+      return Promise.reject(error);
+  })
+};
+module.exports = { readArticlesSortByDate, readArticleById, updateArticle, readArticleByTopic }

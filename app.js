@@ -1,13 +1,10 @@
 const express = require("express");
 const app = express();
-const { getTopics } = require("./controllers/topics.controller");
-const getAllEndpoints = require("./controllers/api.controller");
-const {
-  getArticles,
-  getArticleById, patchArticle
-} = require("./controllers/article.controller");
-const {getCommentsByArticleId, postComment, deleteComment} = require('./controllers/comment.controller')
-const {getAllUsers} = require('./controllers/users.controller')
+const apiRouter = require("./routers/api.router");
+const articlesRouter = require("./routers/articles.router");
+const commentsRouter = require("./routers/comments.router");
+const {topicsRouter} = require("./routers/topics.router");
+const usersRouter = require("./routers/users.router");
 const {
   handleCustomErrors,
   handleServerErrors,
@@ -16,31 +13,18 @@ const {
 
 app.use(express.json());
 
-app.get(`/api`, getAllEndpoints);
-
-app.get('/api/users', getAllUsers);
-
-app.get(`/api/topics`, getTopics);
-
-app.get("/api/articles", getArticles);
-
-app.get("/api/articles/:article_id", getArticleById);
-
-app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
-
-app.post("/api/articles/:article_id/comments", postComment)
-
-app.patch("/api/articles/:article_id", patchArticle)
-
-app.delete("/api/comments/:comment_id", deleteComment)
-
+app.use("/api", apiRouter);
+app.use("/api/articles", articlesRouter);
+app.use("/api/comments", commentsRouter);
+app.use("/api/topics", topicsRouter);
+app.use("/api/users", usersRouter);
 
 app.use((request, response) => {
   response.status(404).send({ msg: "404 Error. This page doesn't exist" });
 });
+
 app.use(handlePsqlErrors);
 app.use(handleCustomErrors);
-
 app.use(handleServerErrors);
 
 module.exports = app;
