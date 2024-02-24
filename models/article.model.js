@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const {checkIfUsernameExists} = require("./comment.model")
 
 function readAllArticles() {
   return db
@@ -66,7 +67,6 @@ const checkTopicExists = async (topic) => {
     return dbOutput.rows[0];
   }
 };
-
 function readArticlesByQuery(topic, sort_by = "created_at", order = "desc") {
   if (
     ![
@@ -128,9 +128,29 @@ function readArticlesByQuery(topic, sort_by = "created_at", order = "desc") {
     }
   }
 }
+function addArticle(newArticle){
+  const { author, title, body, topic } = newArticle;
+  return checkTopicExists(topic).then(() => {
+  return checkIfUsernameExists(author).then(() => {
+  return db
+    .query(
+      `INSERT INTO articles 
+  (author, title, body, topic, votes)
+  VALUES
+  ($1, $2, $3, $4, 0) RETURNING *;`,
+      [author, title, body, topic]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+  })
+})
+}
+
+
 module.exports = {
-  readAllArticles,
   readArticleById,
   updateArticle,
   readArticlesByQuery,
+  addArticle
 };

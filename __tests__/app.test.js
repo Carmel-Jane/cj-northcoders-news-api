@@ -167,6 +167,80 @@ describe("GET/api/articles order query",() => {
   });
 })
 })
+describe("POST/api/articles", () => {
+  test("should responds with the posted article with the correct properties", () => {
+    const newArticle = {
+      author: "lurker",
+      title: "Posted article",
+      body: "Body of new article",
+      topic: "cats",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body: { article } }) => {
+        expect(article).toMatchObject({
+          author: "lurker",
+          title: "Posted article",
+          body: "Body of new article",
+          topic: "cats",
+          article_id: expect.any(Number),
+          votes: 0,
+          created_at: expect.any(String),
+          comment_count: 0,
+        });
+      });
+  });
+
+  describe("error handling for post article", () => {
+    test("400. Should respond with 400 and error message if request is missing a field", () => {
+      const newArticle = {
+        author: "lurker",
+        body: "Mising fields(no title)",
+        topic: "cats",
+      };
+      return request(app)
+        .post("/api/articles")
+        .expect(400)
+        .send(newArticle)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("404. Should respond with 404 and error message if the username doesn't exist", () => {
+      const newArticle = {
+        author: "Carmel",
+        title: "Title",
+        body: "Body",
+        topic: "cats",
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("404 Error. This username doesn't exist");
+        });
+    });
+    test("404. Should respond with 404 and error message if the topic doesn't exist", () => {
+      const newArticle = {
+        author: "lurker",
+        title: "Title",
+        body: "Body",
+        topic: "carmel",
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("404 Error. This topic doesn't exist");
+        });
+    });
+  });
+});
+
 describe("GET/api/articles/:article_id/comments", () => {
   test("should respond with an array of comments for given article_id, each with the correct properties", () => {
     return request(app)

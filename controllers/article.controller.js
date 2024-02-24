@@ -1,4 +1,4 @@
-const {  readArticleById, updateArticle, readArticlesByQuery} = require("../models/article.model");
+const {  readArticleById, updateArticle, readArticlesByQuery, addArticle} = require("../models/article.model");
 
 function getArticles(req, res, next){
   const {topic, sort_by, order} = req.query
@@ -8,8 +8,6 @@ function getArticles(req, res, next){
     })
     .catch(next);
 };
-
-
 function getArticleById(req, res, next) {
   const articleId = req.params.article_id;
   readArticleById(articleId)
@@ -30,5 +28,16 @@ function patchArticle(req, res, next){
     })
     .catch(next);
 }
-
-module.exports = { getArticles, getArticleById, patchArticle };
+function postArticle(req, res, next){
+  const { body } = req;
+  addArticle(body)
+    .then((newArticle) => {
+      const { article_id } = newArticle;
+      return readArticleById(article_id);
+    })
+    .then((article) => {
+      res.status(201).send({ article });
+    })
+    .catch(next);
+}
+module.exports = { getArticles, getArticleById, patchArticle, postArticle };

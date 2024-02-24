@@ -69,4 +69,4 @@ function updateCommentVotes(commentId, update){
       return rows[0];
     });
 };
-module.exports = { readCommentsByArticleId, insertComment, deleteCommentModel, updateCommentVotes };
+module.exports = { readCommentsByArticleId, insertComment, deleteCommentModel, updateCommentVotes, checkIfUsernameExists };
