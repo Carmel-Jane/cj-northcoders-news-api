@@ -1,16 +1,18 @@
+const {readArticleById} = require('../models/article.model');
 const {readCommentsByArticleId, insertComment, deleteCommentModel,updateCommentVotes} = require('../models/comment.model')
 
 function getCommentsByArticleId(req, res, next){
-    const articleId = req.params.article_id;
-    readCommentsByArticleId(articleId)
-    .then((comments) => {
-       
-      res.status(200).send(comments);
+  const { article_id } = req.params;
+  const {limit, page} = req.query
+  return Promise.all([
+    readArticleById(article_id),
+    readCommentsByArticleId(article_id, limit, page),
+  ])
+    .then((returnedPromises) => {
+      res.status(200).send({ comments: returnedPromises[1] });
     })
-    .catch((err) => {
-      next(err);
-    });
-}
+    .catch(next);
+};
 function postComment(req,res,next){
     const { article_id } = req.params;
   const { body } = req;

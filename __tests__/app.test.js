@@ -316,8 +316,9 @@ describe("GET/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then((res) => {
-        expect(res.body).toHaveLength(11);
-        res.body.forEach((comment) => {
+        const comments = res.body.comments
+        expect(comments).toHaveLength(10);
+        comments.forEach((comment) => {
           expect(comment).toMatchObject({
             body: expect.any(String),
             votes: expect.any(Number),
@@ -333,7 +334,7 @@ describe("GET/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then((res) => {
-        const comments = res.body;
+        const comments = res.body.comments;
         expect(comments).toBeSortedBy("created_at", { descending: true });
       });
   });
@@ -351,8 +352,96 @@ describe("GET/api/articles/:article_id/comments", () => {
         .get("/api/articles/2/comments")
         .expect(200)
         .then((response) => {
-          expect(response.body).toEqual([]);
+          expect(response.body.comments).toEqual([]);
         });
+    });
+  });
+  describe("GET/api/articles/article_id/comments limit query", () => {
+    test("should respond with the number of comments specified by the limit query", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=5")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBe(5);
+        });
+    });
+    test("should respond with 10 comments by default if there isn't a limit query", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(comments.length).toBe(10);
+        });
+    });
+    test("400. Should respond with 400 and error message if there's an invalid limit query", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=carmel")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
+  describe("GET/api/articles/article_id/comments page query", () => {
+    test("should return the comments on the page requested by the page query", () => {
+      return request(app)
+        .get("/api/articles/1/comments?page=2&&limit=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          console.log(comments)
+          expect(comments).toEqual([
+            {
+              comment_id: 18,
+              body: "This morning, I showered for nine minutes.",
+              article_id: 1,
+              author: "butter_bridge",
+              votes: 16,
+              created_at: "2020-07-21T00:20:00.000Z",
+            },
+            {
+              comment_id: 13,
+              body: "Fruit pastilles",
+              article_id: 1,
+              author: "icellusedkars",
+              votes: 0,
+              created_at: "2020-06-15T10:25:00.000Z",
+            },
+          ]);
+        });
+    });
+    test("should return the first page by default if there isn't a page query", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=2")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          console.log(comments)
+          expect(comments).toEqual([
+            {
+              comment_id: 5,
+              body: "I hate streaming noses",
+              article_id: 1,
+              author: "icellusedkars",
+              votes: 0,
+              created_at: "2020-11-03T21:00:00.000Z",
+            },
+            {
+              comment_id: 2,
+              body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+              article_id: 1,
+              author: "butter_bridge",
+              votes: 14,
+              created_at: "2020-10-31T03:03:00.000Z",
+            },
+          ]);
+        });
+    });
+    test('400. Should return 400 and error message if page query is invalid', () => {
+      return request(app)
+      .get('/api/articles/1/comments?page=carmel')
+      .expect(400)
+      .then(({body: {msg}}) => {
+        expect(msg).toBe('Bad request');
+      })
     });
   });
 });

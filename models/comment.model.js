@@ -1,24 +1,26 @@
 const db = require("../db/connection");
 
-function readCommentsByArticleId(articleId) {
+function readCommentsByArticleId(articleId, limit = 10, page = 1) {
+  const offset = (page - 1) * limit;
   return db
     .query(
-      "SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC",
-      [articleId]
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+      [articleId, limit, offset]
     )
     .then((res) => {
       return res.rows;
     });
 }
 const checkIfUsernameExists = async (username) => {
-  const dbOutput = await db.query(
-    'SELECT * FROM users WHERE username = $1;',
-    [username]
-  );
+  const dbOutput = await db.query("SELECT * FROM users WHERE username = $1;", [
+    username,
+  ]);
 
   if (dbOutput.rows.length === 0) {
-    
-    return Promise.reject({ status: 404, msg: "404 Error. This username doesn't exist" });
+    return Promise.reject({
+      status: 404,
+      msg: "404 Error. This username doesn't exist",
+    });
   }
 };
 
@@ -39,7 +41,6 @@ function insertComment(articleId, newComment) {
         });
     })
     .catch((error) => {
-      
       return Promise.reject(error);
     });
 }
@@ -48,11 +49,14 @@ function deleteCommentModel(commentId) {
     .query(`DELETE FROM comments WHERE comment_id = $1;`, [commentId])
     .then(({ rowCount }) => {
       if (rowCount === 0) {
-        return Promise.reject({ status: 404, msg: "404 Error. Comment doesn't exist" });
+        return Promise.reject({
+          status: 404,
+          msg: "404 Error. Comment doesn't exist",
+        });
       }
     });
 }
-function updateCommentVotes(commentId, update){
+function updateCommentVotes(commentId, update) {
   return db
     .query(
       `UPDATE comments
@@ -64,9 +68,18 @@ function updateCommentVotes(commentId, update){
     )
     .then(({ rows }) => {
       if (rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "404 Error. This comment doesn't exist" });
+        return Promise.reject({
+          status: 404,
+          msg: "404 Error. This comment doesn't exist",
+        });
       }
       return rows[0];
     });
+}
+module.exports = {
+  readCommentsByArticleId,
+  insertComment,
+  deleteCommentModel,
+  updateCommentVotes,
+  checkIfUsernameExists,
 };
-module.exports = { readCommentsByArticleId, insertComment, deleteCommentModel, updateCommentVotes, checkIfUsernameExists };
