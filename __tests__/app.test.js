@@ -103,15 +103,17 @@ describe("GET/api/articles", () => {
       .then((res) => {
         const articles = res.body.articles
   
-        expect(articles.length).toBe(13);
+        expect(articles.length).toBe(10);
         articles.forEach((article) => {
           expect(article).toMatchObject({
             title: expect.any(String),
             topic: expect.any(String),
             author: expect.any(String),
-            body: expect.any(String),
             created_at: expect.any(String),
             article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+            votes: expect.any(Number),
+            article_id: expect.any(Number)
           });
         });
       });
@@ -166,6 +168,73 @@ describe("GET/api/articles order query",() => {
       });
   });
 })
+describe("GET/api/articles limit query", () =>{
+  test("should respond with the same number of articles as the limit request. Limit request is 3, should respond with 3 articles", () => {
+    return request(app)
+      .get("/api/articles?limit=3")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(3);
+      });
+  });
+  test("should respond with 10 articles if no limit is provided ", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(10);
+      });
+  });
+  test("400. Responds with 400 and error message if limit query is invalid", () => {
+    return request(app)
+      .get("/api/articles?limit=carmel")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+})
+describe("GET/api/articles page query", () => {
+  test("should respond with the articles on the specified page according to limit and page query", () => {
+    return request(app)
+      .get("/api/articles?limit=2&page=2")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(2);
+        expect(articles).toEqual([
+          {
+            article_id: 2,
+            author: 'icellusedkars',
+            title: 'Sony Vaio; or, The Laptop',
+            topic: 'mitch',
+            created_at: '2020-10-16T05:03:00.000Z',
+            votes: 0,
+            article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+            comment_count: 0
+          },
+          {
+            article_id: 13,
+            author: 'butter_bridge',
+            title: 'Another article about Mitch',
+            topic: 'mitch',
+            created_at: '2020-10-11T11:24:00.000Z',
+            votes: 0,
+            article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+            comment_count: 0
+          }
+        ]
+    );
+      });
+  });
+  test("400. Should respond with 400 and error message if page query is invalid", () => {
+    return request(app)
+      .get("/api/articles?page=carmel")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+});
 })
 describe("POST/api/articles", () => {
   test("should responds with the posted article with the correct properties", () => {

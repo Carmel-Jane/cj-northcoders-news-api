@@ -1,10 +1,10 @@
 const {  readArticleById, updateArticle, readArticlesByQuery, addArticle} = require("../models/article.model");
 
 function getArticles(req, res, next){
-  const {topic, sort_by, order} = req.query
-  readArticlesByQuery(topic, sort_by, order)
-    .then((articles) => {
-      res.status(200).send({ articles });
+  const {topic, sort_by, order, limit, page} = req.query
+  readArticlesByQuery(topic, sort_by, order, limit, page)
+    .then(([rowCount, { rows }]) => {
+      res.status(200).send({ articles: rows, total_count: rowCount });
     })
     .catch(next);
 };
