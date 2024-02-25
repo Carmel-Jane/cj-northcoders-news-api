@@ -10,5 +10,18 @@ function readTopics() {
       next(err);
     });
 }
+function addTopic(topic){
+const { slug, description } = topic;
+return db
+  .query(
+    `INSERT INTO topics 
+  (slug, description)
+  VALUES
+  ($1, $2) RETURNING *`,
+    [slug, description]
+  )
+  .then(({ rows }) => {
+    return rows[0];
+  });}
 
-module.exports = { readTopics };
+module.exports = { readTopics, addTopic };

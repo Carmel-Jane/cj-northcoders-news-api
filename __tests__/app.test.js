@@ -35,6 +35,38 @@ describe("GET /api/topics", () => {
     });
   });
 });
+describe("POST/api/topics", () => {
+  test("shoul respond with the new posted topic", () => {
+    const newTopic = {
+      slug: "topic name",
+      description: "description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body: { topic } }) => {
+        expect(topic).toMatchObject({
+          slug: "topic name",
+          description: "description",
+        });
+      });
+  });
+  describe("error handling for post topic",() =>{
+  test("400. Should respond with 400 and error message if the request has missing fields", () => {
+    const newTopic = {
+      description: "missing field",
+    };
+    return request(app)
+      .post("/api/topics")
+      .expect(400)
+      .send(newTopic)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+})
+})
 describe("GET /api", () => {
   test("should return the endpoints JSON object", () => {
     return request(app)
@@ -388,7 +420,6 @@ describe("GET/api/articles/:article_id/comments", () => {
         .get("/api/articles/1/comments?page=2&&limit=2")
         .expect(200)
         .then(({ body: { comments } }) => {
-          console.log(comments)
           expect(comments).toEqual([
             {
               comment_id: 18,
@@ -414,7 +445,7 @@ describe("GET/api/articles/:article_id/comments", () => {
         .get("/api/articles/1/comments?limit=2")
         .expect(200)
         .then(({ body: { comments } }) => {
-          console.log(comments)
+      
           expect(comments).toEqual([
             {
               comment_id: 5,
