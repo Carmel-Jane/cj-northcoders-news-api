@@ -1,16 +1,6 @@
 const db = require("../db/connection");
 const {checkIfUsernameExists} = require("./comment.model")
 
-function readAllArticles() {
-  return db
-    .query("SELECT * FROM articles ORDER BY created_at DESC")
-    .then((res) => {
-      return res.rows;
-    })
-    .catch((err) => {
-      next(err);
-    });
-}
 
 function readArticleById(articleId) {
   return db
@@ -129,77 +119,33 @@ function addArticle(newArticle){
   })
 })
 }
-
-//function readArticlesByQuery(topic, sort_by = "created_at", order = "desc", limit = 10, page = 1) {
-//   if (
-//     ![
-//       "article_id",
-//       "author",
-//       "title",
-//       "topic",
-//       "created_at",
-//       "votes",
-//       "article_img_url",
-//       "comment_count",
-//     ].includes(sort_by) ||
-//     !["asc", "desc"].includes(order)
-//   ) {
-//     return Promise.reject({ status: 400, msg: "Bad request" });
-//   }
-
-//   if (!topic && sort_by === "created_at" && order === "desc") {
-//     return readAllArticles();
-//   } else {
-//     if (topic) {
-//       return checkTopicExists(topic).then((topicRow) => {
-//         if (!topicRow) {
-//           return Promise.reject({ status: 404, msg: "Topic not found" });
-//         }
-
-//         const queryValues = [topicRow.slug];
-//         const offset = (page - 1) * limit;
-//         let queryStr = `SELECT 
-//           articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count 
-//           FROM articles 
-//           LEFT JOIN comments ON articles.article_id = comments.article_id
-//           WHERE articles.topic = $1`;
-
-//         queryStr += ` GROUP BY articles.article_id
-//         ORDER BY articles.${sort_by} ${order}
-//         LIMIT $2 OFFSET $3`;
-
-//         queryValues.push(limit);
-//         queryValues.push(offset);
-
-//         return db.query(queryStr, queryValues).then(({ rows }) => {
-//           return rows;
-//         });
-//       });
-//     } else {
-//       const queryValues = [];
-//       const offset = (page - 1) * limit;
-//       let queryStr = `SELECT 
-//         articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count 
-//         FROM articles 
-//         LEFT JOIN comments ON articles.article_id = comments.article_id`;
-
-//       queryStr += ` GROUP BY articles.article_id
-//       ORDER BY articles.${sort_by} ${order}
-//       LIMIT $1 OFFSET $2`;
-
-//       queryValues.push(limit);
-//       queryValues.push(offset);
-
-//       return db.query(queryStr, queryValues).then(({ rows }) => {
-//         return rows;
-//       });
-//     }
-//   }
-// //}
+function removeArticle(articleId){
+  return db
+    .query(
+      `DELETE FROM comments 
+  WHERE article_id = $1
+  RETURNING *;`,
+      [articleId]
+    )
+    .then(({ rows }) => {
+      return db.query(
+        `DELETE FROM articles 
+    WHERE article_id = $1 
+    RETURNING *;`,
+        [articleId]
+      );
+    })
+    .then(({ rowCount }) => {
+      if (rowCount === 0) {
+        return Promise.reject({ status: 404, msg: "404 Error. This article doesn't exist" });
+      }
+    });
+};
 
 module.exports = {
   readArticleById,
   updateArticle,
   readArticlesByQuery,
-  addArticle
+  addArticle,
+  removeArticle
 };

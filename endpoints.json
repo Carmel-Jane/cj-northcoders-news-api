@@ -34,6 +34,12 @@
       "comment_count": 6
     }
   },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes an article and associated comments",
+    "queries": [],
+    "bodyFormat": {},
+    "exampleResponse": {}
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles",
     "queries": ["author", "topic", "sort_by", "order", "limit", "p"],

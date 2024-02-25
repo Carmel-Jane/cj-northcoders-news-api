@@ -629,6 +629,28 @@ describe("PATCH/api/articles/:article_id", () => {
     });
   });
 });
+describe("DELETE/api/articles/:article_id", () => {
+  test("Should delete selected article and it's comments, responds with 204 and no content", () => {
+    return request(app).delete("/api/articles/1").expect(204);
+  });
+  test("404. Responds with 404 and error message if article Id doesn't exist", () => {
+    return request(app)
+      .delete("/api/articles/12345")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("404 Error. This article doesn't exist");
+      });
+  });
+  test("400. Responds with 400 and error message if an invalid article Id", () => {
+    return request(app)
+      .delete("/api/articles/carmel")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+});
+
 describe("DELETE/api/comments/:comment_id", () => {
   test("204. Should respond with 204 and no content", () => {
     return request(app).delete("/api/comments/2").expect(204);

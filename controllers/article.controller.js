@@ -1,4 +1,4 @@
-const {  readArticleById, updateArticle, readArticlesByQuery, addArticle} = require("../models/article.model");
+const {  readArticleById, updateArticle, readArticlesByQuery, addArticle, removeArticle} = require("../models/article.model");
 
 function getArticles(req, res, next){
   const {topic, sort_by, order, limit, page} = req.query
@@ -40,4 +40,12 @@ function postArticle(req, res, next){
     })
     .catch(next);
 }
-module.exports = { getArticles, getArticleById, patchArticle, postArticle };
+function deleteArticle(req,res,next){
+  const { article_id } = req.params;
+  removeArticle(article_id)
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch(next);
+};
+module.exports = { getArticles, getArticleById, patchArticle, postArticle , deleteArticle};
