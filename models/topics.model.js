@@ -6,7 +6,7 @@ function readTopics() {
     .then((res) => {
       return res.rows;
     })
- 
+ console.log("fml")
 }
 function addTopic(topic){
 const { slug, description } = topic;
