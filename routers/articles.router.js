@@ -1,5 +1,4 @@
-const express = require("express");
-const articlesRouter = express.Router();
+
 const {
   getArticles,
   getArticleById,
@@ -11,6 +10,8 @@ const {
   getCommentsByArticleId,
   postComment,
 } = require("../controllers/comment.controller");
+
+const articlesRouter = require("express").Router()
 
 articlesRouter.route("/").get(getArticles).post(postArticle)
 

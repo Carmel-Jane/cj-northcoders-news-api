@@ -16,10 +16,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api", apiRouter);
-app.use("/api/articles", articlesRouter);
-app.use("/api/comments", commentsRouter);
-app.use("/api/topics", topicsRouter);
-app.use("/api/users", usersRouter);
 
 app.use((request, response) => {
   response.status(404).send({ msg: "404 Error. This page doesn't exist" });
