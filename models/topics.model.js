@@ -6,9 +6,7 @@ function readTopics() {
     .then((res) => {
       return res.rows;
     })
-    .catch((err) => {
-      next(err);
-    });
+ 
 }
 function addTopic(topic){
 const { slug, description } = topic;

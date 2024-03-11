@@ -1,10 +1,7 @@
 const express = require("express");
 const app = express();
 const apiRouter = require("./routers/api.router");
-const articlesRouter = require("./routers/articles.router");
-const commentsRouter = require("./routers/comments.router");
-const {topicsRouter} = require("./routers/topics.router");
-const usersRouter = require("./routers/users.router");
+
 const {
   handleCustomErrors,
   handleServerErrors,
